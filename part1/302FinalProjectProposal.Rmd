@@ -1,0 +1,53 @@
+---
+title: "302FinalProject"
+output: pdf_document
+---
+```{r}
+install.packages("NHANES")
+library(NHANES)
+library(dplyr)
+```
+
+```{r}
+data <- NHANES %>%
+  group_by(ID) %>%
+  filter(n() == 1)
+
+data <- data %>%
+  mutate(
+    PhysActiveDays = ifelse(PhysActive == "No", 0, PhysActiveDays),
+    AlcoholDay = ifelse(is.na(Alcohol12PlusYr), 0, AlcoholDay),
+  )
+
+data <- subset(as.data.frame(data), 
+              select = c(ID, DaysPhysHlthBad, PhysActiveDays, AlcoholDay, SleepHrsNight, Smoke100n, HardDrugs, PhysActive, Marijuana, SleepTrouble, Alcohol12PlusYr))
+data <- na.omit(data)
+```
+
+```{r}
+model = lm(DaysPhysHlthBad ~ PhysActiveDays + AlcoholDay + SleepHrsNight + Smoke100n + HardDrugs + PhysActive + Marijuana + SleepTrouble + Alcohol12PlusYr, data = data)
+coef(model)
+```
+
+```{r}
+model = lm(DaysPhysHlthBad ~ PhysActiveDays + AlcoholDay + SleepHrsNight + Smoke100n + HardDrugs + PhysActive + Marijuana + SleepTrouble + Alcohol12PlusYr, data = data)
+y_hat <- fitted(model)
+e_hat <- resid(model)
+plot(x = y_hat, y = data$DaysPhysHlthBad, main="Response vs. Fitted", xlab="Fitted", ylab="DaysPhysHlthBad")
+abline(a=0, b=1, lty=2)
+pairs(data)
+plot(x = y_hat, y = e_hat, main = "Residual vs. Fitted", ylab = "Residuals", xlab = "Fitted")
+plot(x = data$PhysActiveDays, y = e_hat, main = "Residual vs. PhysActiveDays", ylab = "Residuals", xlab = "PhysActiveDays")
+plot(x = data$AlcoholDay, y = e_hat, main = "Residual vs. AlcoholDay", ylab = "Residuals", xlab = "AlcoholDay")
+plot(x = data$SleepHrsNight, y = e_hat, main = "Residual vs. SleepHrsNight", ylab = "Residuals", xlab = "SleepHrsNight")
+plot(x = data$Smoke100n, y = e_hat, main = "Residual vs. Smoke100n", ylab = "Residuals", xlab = "Smoke100n")
+plot(x = data$HardDrugs, y = e_hat, main = "Residual vs. HardDrugs", ylab = "Residuals", xlab = "HardDrugs")
+plot(x = data$PhysActive, y = e_hat, main = "Residual vs. PhysActive", ylab = "Residuals", xlab = "PhysActive")
+plot(x = data$Marijuana, y = e_hat, main = "Residual vs. Marijuana", ylab = "Residuals", xlab = "Marijuana")
+plot(x = data$SleepTrouble, y = e_hat, main = "Residual vs. SleepTrouble", ylab = "Residuals", xlab = "SleepTrouble")
+plot(x = data$Alcohol12PlusYr, y = e_hat, main = "Residual vs. Alcohol12PlusYr", ylab = "Residuals", xlab = "Alcohol12PlusYr")
+qqnorm(e_hat)
+qqline(e_hat)
+```
+
+
